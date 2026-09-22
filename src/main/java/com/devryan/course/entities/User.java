@@ -1,5 +1,6 @@
 package com.devryan.course.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ public class User implements Serializable {
     private String phone;
     private String password;
 
+    @JsonIgnore // encerra o lopping de json da requisição, no geral serve para ocultar dados
     @OneToMany(mappedBy = "client") //anotação JPA que mapeia um relacionamento "Um para Muitos" (mappedBy avisa ao JPA que quem controla essa relação, é a outra classe do relacionamento
     private List<Order> orders = new ArrayList<>();
 
