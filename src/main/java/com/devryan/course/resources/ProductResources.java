@@ -1,12 +1,9 @@
 package com.devryan.course.resources;
 
-import com.devryan.course.entities.Order;
 import com.devryan.course.entities.Product;
 import com.devryan.course.entities.User;
-import com.devryan.course.services.OrderService;
 import com.devryan.course.services.ProductService;
 import com.devryan.course.services.UserService;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/orders")
-public class OrderResources {
+@RequestMapping(value = "/products")
+public class ProductResources {
 
     @Autowired
     // Realiza uma injeção de dependência, ele instancia o UserService e o injeta direto na variável, sem necessidade de um new
@@ -26,8 +23,8 @@ public class OrderResources {
 
     @GetMapping// Mapeia requisições http do tipo GET
     public ResponseEntity<List<Product>> findAll(){
-        List<Product> list = productService.findAll();
-        return ResponseEntity.ok().body(list);
+        List<Product> products = productService.findAll();
+        return ResponseEntity.ok().body(products);
     }
 
     @GetMapping(value = "/{id}")

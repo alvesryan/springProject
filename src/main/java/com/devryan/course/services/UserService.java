@@ -12,15 +12,15 @@ import java.util.Optional;
 public class UserService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     public List<User> findAll(){
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
     public User findById(Long id){
-        repository.findById(id);
-        Optional<User> user = repository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
+        userRepository.findById(id);
+        Optional<User> user = userRepository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
         return user.orElseThrow(); // .orElseThrow dispara uma exception caso não exista algum com esse id
     }
 }

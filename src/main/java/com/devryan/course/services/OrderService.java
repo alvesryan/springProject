@@ -12,15 +12,15 @@ import java.util.Optional;
 public class OrderService {
 
     @Autowired
-    private OrderRepository repository;
+    private OrderRepository orderRepository;
 
     public List<Order> findAll(){
-        return repository.findAll();
+        return orderRepository.findAll();
     }
 
     public Order findById(Long id){
-        repository.findById(id);
-        Optional<Order> order = repository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
+        orderRepository.findById(id);
+        Optional<Order> order = orderRepository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
         return order.orElseThrow(); // .orElseThrow dispara uma exception caso não exista algum com esse id
     }
 }
