@@ -1,5 +1,6 @@
 package com.devryan.course.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -16,6 +17,8 @@ public class Category implements Serializable {
     private Long id;
     private String name;
 
+    @JsonIgnore //ignorando a relação na saída do json para evitar looping
+    @ManyToMany(mappedBy = "categories") // cria uma relação de muitos pra muitos com a lista categories na classe Product
     private Set<Product> products = new HashSet<>();
 
     public Category() {
