@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_order")
@@ -23,6 +25,9 @@ public class Order implements Serializable {
     @ManyToOne //anotação JPA que mapeia relacionamento "Muitos para um", muitos registros dessa classe podem estar associados a uma outra classe
     @JoinColumn(name = "client_id") // serve para nomear o nome da coluna onde a chave estrangeira será armazenada
     private User client;
+
+    @OneToMany(mappedBy = "id.order") //no orderItem eu tenho o id e no id eu tenho o order;
+    private Set<OrderItem> items = new HashSet<>();
 
     public Order() {
     }
@@ -60,6 +65,10 @@ public class Order implements Serializable {
 
     public OrderStatus getOrderStatus() {
         return OrderStatus.valueOf(orderStatus);
+    }
+
+    public Set<OrderItem> getItems() {
+        return items;
     }
 
     public void setOrderStatus(OrderStatus orderStatus) {

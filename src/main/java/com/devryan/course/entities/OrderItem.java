@@ -1,6 +1,7 @@
 package com.devryan.course.entities;
 
 import com.devryan.course.entities.pk.OrderItemPk;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -13,7 +14,7 @@ import java.util.Objects;
 public class OrderItem implements Serializable {
 
     @EmbeddedId //anotação de chave composta
-    private OrderItemPk id;
+    private OrderItemPk id = new OrderItemPk();
     private Integer quantity;
     private Double price;
 
@@ -27,6 +28,7 @@ public class OrderItem implements Serializable {
         this.price = price;
     }
 
+    @JsonIgnore // ignorando
     public Order getOrder(){
         return id.getOrder();
     }
