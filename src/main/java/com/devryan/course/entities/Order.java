@@ -3,6 +3,7 @@ package com.devryan.course.entities;
 import com.devryan.course.entities.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.metamodel.mapping.ordering.ast.OrderingExpression;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -86,6 +87,15 @@ public class Order implements Serializable {
         if(orderStatus != null){
             this.orderStatus = orderStatus.getCode();
         }
+    }
+
+    public Double getTotal(){
+        double sum = 0.0;
+        for(OrderItem x : items){
+            sum += x.getSubTotal();
+        }
+
+        return sum;
     }
 
     @Override
