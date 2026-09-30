@@ -65,5 +65,9 @@ public class TestConfig implements CommandLineRunner {
         OrderItem oi4 = new OrderItem(o3, p5, 2, p5.getPrice());
 
         orderItemRepository.saveAll(Arrays.asList(oi1, oi2, oi3, oi4));
+
+        Payment pay1 = new Payment(null, Instant.parse("2026-06-20T21:53:07Z"), o1);
+        o1.setPayment(pay1); // para salvar um objeto dependente eu devo usar a classe que ele depende
+        orderRepository.save(o1); // e pra salvar no objeto eu devo chamar seu repository denovo
     }
 }
