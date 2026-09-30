@@ -23,4 +23,8 @@ public class UserService {
         Optional<User> user = userRepository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
         return user.orElseThrow(); // .orElseThrow dispara uma exception caso não exista algum com esse id
     }
+
+    public User insert(User user){
+        return userRepository.save(user);
+    }
 }
