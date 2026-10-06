@@ -2,6 +2,7 @@ package com.devryan.course.services;
 
 import com.devryan.course.entities.User;
 import com.devryan.course.repositories.UserRepository;
+import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class UserService {
     public User findById(Long id){
         userRepository.findById(id);
         Optional<User> user = userRepository.findById(id); //Optional<T> é uma classe que serve para evitar o nullPointerException.
-        return user.orElseThrow(); // .orElseThrow dispara uma exception caso não exista algum com esse id
+        return user.orElseThrow(() -> new ResourceNotFoundException(id)); // .orElseThrow dispara uma exception caso não exista algum com esse id
     }
 
     public User insert(User user){
