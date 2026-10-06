@@ -2,8 +2,10 @@ package com.devryan.course.services;
 
 import com.devryan.course.entities.User;
 import com.devryan.course.repositories.UserRepository;
+import com.devryan.course.services.exceptions.DatabaseException;
 import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +32,15 @@ public class UserService {
     }
 
     public void delete(Long id){
-        userRepository.deleteById(id);
+        try {
+            if (!userRepository.existsById(id)) {
+                throw new ResourceNotFoundException(id);
+            }
+            userRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e){
+            throw new DatabaseException(e.getMessage());
+        }
+
     }
 
 
