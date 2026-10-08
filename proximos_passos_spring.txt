@@ -1,0 +1,53 @@
+================================================================================
+          PRÓXIMOS PASSOS NO SPRING BOOT (PÓS-CURSO NÉLIO ALVES)
+================================================================================
+
+Como você acabou de finalizar a base da API e está entrando no mundo do Spring, 
+aqui está uma trilha de evolução recomendada, do mais simples ao mais avançado:
+
+1. DTOs (Data Transfer Objects)
+   - O que é: Parar de retornar e receber as "Entidades" (ex: User) diretamente nos Controllers.
+   - Por que: Evita expor dados sensíveis (como senha), previne problemas de loop infinito no JSON (Jackson) e desacopla a API do banco de dados.
+   - Como buscar: "Spring Boot DTO pattern", "MapStruct" ou "ModelMapper".
+
+2. Validações de Dados (Spring Boot Validation)
+   - O que é: Validar os dados que chegam no Post/Put antes de chegar no Service.
+   - Por que: Não deixar salvar um usuário sem nome ou com email inválido.
+   - Como buscar: Anotações "@Valid", "@NotBlank", "@Email", "@Size" e tratar "MethodArgumentNotValidException" no seu ResourceExceptionHandler.
+
+3. Paginação e Ordenação
+   - O que é: Em vez de retornar todos os usuários de uma vez, retornar páginas de 10 em 10.
+   - Por que: Performance. Nenhuma API real retorna um "findAll" com 10.000 registros de uma vez.
+   - Como buscar: "Spring Data JPA Pageable", "PageRequest", passando parâmetros na URL (?page=0&size=10).
+
+4. Trocar o Banco de Dados (PostgreSQL ou MySQL)
+   - O que é: Sair do banco em memória (H2) e usar um banco de dados real.
+   - Por que: O H2 é apenas para testes, você perde os dados toda vez que reinicia.
+   - Como buscar: "Spring Boot com PostgreSQL", configurar "application-dev.properties".
+
+5. Migrações de Banco de Dados (Flyway ou Liquibase)
+   - O que é: Versionamento do seu banco de dados.
+   - Por que: Na vida real, não usamos "spring.jpa.hibernate.ddl-auto=update" ou "create-drop". Nós criamos scripts SQL (V1__Create_Table_User.sql) para ter controle do histórico do banco.
+   - Como buscar: "Spring Boot Flyway migration".
+
+6. Documentação Automática (Swagger / OpenAPI)
+   - O que é: Uma interface web para ver e testar todos os endpoints da sua API sem precisar do Postman.
+   - Por que: É o padrão de mercado para documentar APIs para front-ends e outros desenvolvedores.
+   - Como buscar: "Springdoc OpenAPI 3 Spring Boot".
+
+7. Testes Automatizados (O Próximo Grande Passo)
+   - O que é: Escrever código que testa o seu código.
+   - Por que: Garantir que quando você cria algo novo, não quebra o que já funcionava.
+   - Como buscar: "JUnit 5", "Mockito" (para Services) e "MockMvc" (para Controllers).
+
+8. Segurança com Spring Security e JWT (Avançado)
+   - O que é: Adicionar Login, Senha e perfis (ADMIN, CLIENT).
+   - Por que: Proteger rotas (ex: só o próprio usuário pode se deletar).
+   - Como buscar: "Spring Security 3", "Autenticação JWT".
+
+9. Containerização (Docker)
+   - O que é: Empacotar sua API e o Banco de Dados para rodar em qualquer lugar.
+   - Por que: Facilita o deploy na nuvem (AWS, Heroku, etc).
+   - Como buscar: "Spring Boot Dockerfile", "Docker Compose PostgreSQL".
+
+Dica de Ouro: Escolha apenas UM item dessa lista por vez para estudar e aplicar no seu projeto!

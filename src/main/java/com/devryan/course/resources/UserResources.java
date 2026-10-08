@@ -1,5 +1,6 @@
 package com.devryan.course.resources;
 
+import com.devryan.course.dto.UserDTO;
 import com.devryan.course.entities.User;
 import com.devryan.course.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,24 +11,27 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-@RestController  // junção de @Controller + @ResponseBody, controla o acesso à web e diz que o retorno dos métodos iram ser convertidos em JSON
-@RequestMapping(value = "/users") // Define o caminho base da URL para essa classe
+@RestController
+@RequestMapping(value = "/users")
 public class UserResources {
 
-    @Autowired // Realiza uma injeção de dependência, ele instancia o UserService e o injeta direto na variável, sem necessidade de um new
+    @Autowired
     private UserService userService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<User>> findAll(){
+    public ResponseEntity<List<UserDTO>> findAll(){
         List<User> list = userService.findAll();
-        return ResponseEntity.ok().body(list);
+        // Convertemos a lista de Entidades (User) para uma lista de DTOs (UserDTO)
+        // O .stream().map() aplica o construtor do DTO em cada elemento da lista original
+        List<UserDTO> listDto = list.stream().map(UserDTO::new).toList();
+        return ResponseEntity.ok().body(listDto);
     }
 
     @GetMapping(value = "/{id}")
-    //ResponseEntity<T> é uma classe do spring que é usada para encapsular toda a resposta HTTP. Permite manipular não só o corpo da resposta mas também o status code
-    public ResponseEntity<User> findById(@PathVariable Long id){ //Pega o valor do id que veio na URL e injeta na variável id do método
+    public ResponseEntity<UserDTO> findById(@PathVariable Long id){
         User user = userService.findById(id);
-        return ResponseEntity.ok().body(user);
+        UserDTO dto = new UserDTO(user);
+        return ResponseEntity.ok().body(dto);
     }
 
     @PostMapping

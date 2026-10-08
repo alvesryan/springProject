@@ -1,14 +1,14 @@
 package com.devryan.course.resources;
 
+import com.devryan.course.dto.CategoryDTO;
 import com.devryan.course.entities.Category;
 import com.devryan.course.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -16,19 +16,40 @@ import java.util.List;
 public class CategoryResources {
 
     @Autowired
-    // Realiza uma injeção de dependência, ele instancia o UserService e o injeta direto na variável, sem necessidade de um new
     private CategoryService categoryService;
 
-    @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<Category>> findAll(){
+    @GetMapping
+    public ResponseEntity<List<CategoryDTO>> findAll(){
         List<Category> list = categoryService.findAll();
-        return ResponseEntity.ok().body(list);
+
+        List<CategoryDTO> dtoList = list.stream().map(CategoryDTO::new).toList();
+        return ResponseEntity.ok().body(dtoList);
     }
 
     @GetMapping(value = "/{id}")
-    //ResponseEntity<T> é uma classe do spring que é usada para encapsular toda a resposta HTTP. Permite manipular não só o corpo da resposta mas também o status code
-    public ResponseEntity<Category> findById(@PathVariable Long id){ //Pega o valor do id que veio na URL e injeta na variável id do método
+    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id){
         Category category = categoryService.findById(id);
+
+        CategoryDTO categoryDTO = new CategoryDTO(category);
+        return ResponseEntity.ok().body(categoryDTO);
+    }
+
+    @PostMapping
+    public ResponseEntity<Category> insert(Category category){
+        categoryService.insert(category);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
+        return ResponseEntity.created(uri).build();
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Category> update(@PathVariable Long id, @RequestBody Category category){
+        categoryService.update(id, category);
         return ResponseEntity.ok().body(category);
     }
 }

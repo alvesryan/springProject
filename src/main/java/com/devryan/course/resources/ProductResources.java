@@ -1,16 +1,14 @@
 package com.devryan.course.resources;
 
+import com.devryan.course.dto.ProductDTO;
 import com.devryan.course.entities.Product;
-import com.devryan.course.entities.User;
 import com.devryan.course.services.ProductService;
-import com.devryan.course.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -18,19 +16,40 @@ import java.util.List;
 public class ProductResources {
 
     @Autowired
-    // Realiza uma injeção de dependência, ele instancia o UserService e o injeta direto na variável, sem necessidade de um new
     private ProductService productService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<Product>> findAll(){
+    public ResponseEntity<List<ProductDTO>> findAll(){
         List<Product> products = productService.findAll();
-        return ResponseEntity.ok().body(products);
+
+        List<ProductDTO> productDTOS = products.stream().map(ProductDTO::new).toList();
+        return ResponseEntity.ok().body(productDTOS);
     }
 
     @GetMapping(value = "/{id}")
-    //ResponseEntity<T> é uma classe do spring que é usada para encapsular toda a resposta HTTP. Permite manipular não só o corpo da resposta mas também o status code
-    public ResponseEntity<Product> findById(@PathVariable Long id){ //Pega o valor do id que veio na URL e injeta na variável id do método
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id){
         Product product = productService.findById(id);
+
+        ProductDTO productDTO = new ProductDTO(product);
+        return ResponseEntity.ok().body(productDTO);
+    }
+
+    @PostMapping
+    public ResponseEntity<Product> insert(@RequestBody Product product){
+        product = productService.insert(product);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(product.getId()).toUri();
+        return ResponseEntity.created(uri).body(product);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        productService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product){
+        product = productService.update(id, product);
         return ResponseEntity.ok().body(product);
     }
 }
