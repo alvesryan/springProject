@@ -3,6 +3,7 @@ package com.devryan.course.resources;
 import com.devryan.course.dto.UserDTO;
 import com.devryan.course.entities.User;
 import com.devryan.course.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,11 @@ public class UserResources {
     }
 
     @PostMapping
-    public ResponseEntity<User> insert(@RequestBody User user){
+    public ResponseEntity<UserDTO> insert(@RequestBody @Valid UserDTO userDTO){
+        User user = userDTO.toEntity();
         user = userService.insert(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
-        return ResponseEntity.created(uri).body(user);
+        return ResponseEntity.created(uri).body(new UserDTO(user));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -48,8 +50,9 @@ public class UserResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user){
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody @Valid UserDTO userDTO){
+        User user = userDTO.toEntity();
         user = userService.update(id, user);
-        return ResponseEntity.ok().body(user);
+        return ResponseEntity.ok().body(new UserDTO(user));
     }
 }

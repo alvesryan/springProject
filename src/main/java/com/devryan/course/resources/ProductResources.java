@@ -3,6 +3,7 @@ package com.devryan.course.resources;
 import com.devryan.course.dto.ProductDTO;
 import com.devryan.course.entities.Product;
 import com.devryan.course.services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,11 @@ public class ProductResources {
     }
 
     @PostMapping
-    public ResponseEntity<Product> insert(@RequestBody Product product){
+    public ResponseEntity<ProductDTO> insert(@RequestBody @Valid ProductDTO dto){
+        Product product = dto.toProduct();
         product = productService.insert(product);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(product.getId()).toUri();
-        return ResponseEntity.created(uri).body(product);
+        return ResponseEntity.created(uri).body(new ProductDTO(product));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -48,8 +50,9 @@ public class ProductResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product){
+    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody @Valid ProductDTO dto){
+        Product product = dto.toProduct();
         product = productService.update(id, product);
-        return ResponseEntity.ok().body(product);
+        return ResponseEntity.ok().body(new ProductDTO(product));
     }
 }

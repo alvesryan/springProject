@@ -39,7 +39,7 @@ public class UserService {
             }
             userRepository.deleteById(id);
         } catch (DataIntegrityViolationException e){
-            throw new DatabaseException(e.getMessage());
+            throw new DatabaseException("The user has orders associated with them.");
         }
     }
 

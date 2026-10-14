@@ -1,5 +1,6 @@
 package com.devryan.course.services;
 
+import com.devryan.course.dto.ProductDTO;
 import com.devryan.course.entities.Order;
 import com.devryan.course.entities.Product;
 import com.devryan.course.entities.User;
@@ -56,7 +57,18 @@ public class ProductService {
         }
     }
 
-    private void updateData(Product entity, Product user) {
-        entity.setName(user.getName());
+    private void updateData(Product entity, Product obj) {
+        if (obj.getName() != null) {
+            entity.setName(obj.getName());
+        }
+        if (obj.getDescription() != null) {
+            entity.setDescription(obj.getDescription());
+        }
+        if (obj.getPrice() != null) {
+            entity.setPrice(obj.getPrice());
+        }
+        if (obj.getImgUrl() != null) {
+            entity.setImgUrl(obj.getImgUrl());
+        }
     }
 }

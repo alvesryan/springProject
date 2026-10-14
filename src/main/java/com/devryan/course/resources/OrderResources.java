@@ -2,12 +2,8 @@ package com.devryan.course.resources;
 
 import com.devryan.course.dto.OrderDTO;
 import com.devryan.course.entities.Order;
-import com.devryan.course.entities.Product;
-import com.devryan.course.entities.User;
 import com.devryan.course.services.OrderService;
-import com.devryan.course.services.ProductService;
-import com.devryan.course.services.UserService;
-import org.aspectj.weaver.ast.Or;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,10 +36,11 @@ public class OrderResources {
     }
 
     @PostMapping
-    public ResponseEntity<Order> insert(Order order){
+    public ResponseEntity<OrderDTO> insert(@RequestBody @Valid OrderDTO dto){
+        Order order = dto.toEntity();
         order = orderService.insert(order);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(new OrderDTO(order));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -53,8 +50,9 @@ public class OrderResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Order> update(@PathVariable Long id, @RequestBody Order order){
+    public ResponseEntity<OrderDTO> update(@PathVariable Long id, @RequestBody @Valid OrderDTO dto){
+        Order order = dto.toEntity();
         order = orderService.update(id, order);
-        return ResponseEntity.ok().body(order);
+        return ResponseEntity.ok().body(new OrderDTO(order));
     }
 }

@@ -1,14 +1,25 @@
 package com.devryan.course.dto;
 
 import com.devryan.course.entities.OrderItem;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.io.Serializable;
 
 public class OrderItemDTO implements Serializable {
 
+    @NotBlank(message = "Nome do produto é obrigatório")
     private String name;
+
+    @NotNull(message = "Quantidade é obrigatória")
+    @Positive(message = "Quantidade deve ser maior que zero")
     private Integer quantity;
+
+    @NotNull(message = "Preço é obrigatório")
+    @Positive(message = "Preço deve ser maior que zero")
     private Double price;
+
     private Double subTotal;
 
     public OrderItemDTO(){
@@ -16,7 +27,7 @@ public class OrderItemDTO implements Serializable {
     }
 
     public OrderItemDTO(OrderItem entity){
-        this.name = entity.getProduct().getName();
+        this.name = entity.getProduct() != null ? entity.getProduct().getName() : null;
         this.quantity = entity.getQuantity();
         this.price = entity.getPrice();
         this.subTotal = entity.getSubTotal();

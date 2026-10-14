@@ -3,6 +3,7 @@ package com.devryan.course.resources;
 import com.devryan.course.dto.CategoryDTO;
 import com.devryan.course.entities.Category;
 import com.devryan.course.services.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,11 @@ public class CategoryResources {
     }
 
     @PostMapping
-    public ResponseEntity<Category> insert(Category category){
-        categoryService.insert(category);
+    public ResponseEntity<CategoryDTO> insert(@RequestBody @Valid CategoryDTO dto){
+        Category category = dto.toEntity();
+        category = categoryService.insert(category);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(category.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(new CategoryDTO(category));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -48,8 +50,9 @@ public class CategoryResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Category> update(@PathVariable Long id, @RequestBody Category category){
-        categoryService.update(id, category);
-        return ResponseEntity.ok().body(category);
+    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody @Valid CategoryDTO dto){
+        Category category = dto.toEntity();
+        category = categoryService.update(id, category);
+        return ResponseEntity.ok().body(new CategoryDTO(category));
     }
 }

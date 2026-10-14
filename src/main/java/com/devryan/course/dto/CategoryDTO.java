@@ -2,6 +2,7 @@ package com.devryan.course.dto;
 
 import com.devryan.course.entities.Category;
 import com.devryan.course.entities.Product;
+import jakarta.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -9,7 +10,10 @@ import java.util.Set;
 
 public class CategoryDTO implements Serializable {
     private Long id;
+
+    @NotBlank(message = "Nome é obrigatório")
     private String name;
+
     private Set<ProductDTO> items = new HashSet<>();
 
     public CategoryDTO(){
@@ -19,8 +23,10 @@ public class CategoryDTO implements Serializable {
         this.id = entity.getId();
         this.name = entity.getName();
         
-        for(Product product : entity.getProducts()) {
-            this.items.add(new ProductDTO(product));
+        if (entity.getProducts() != null) {
+            for(Product product : entity.getProducts()) {
+                this.items.add(new ProductDTO(product));
+            }
         }
     }
 
@@ -42,5 +48,13 @@ public class CategoryDTO implements Serializable {
 
     public Set<ProductDTO> getItems() {
         return items;
+    }
+
+    public void setItems(Set<ProductDTO> items) {
+        this.items = items;
+    }
+
+    public Category toEntity() {
+        return new Category(this.id, this.name);
     }
 }
