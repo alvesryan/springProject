@@ -1,10 +1,6 @@
 package com.devryan.course.services;
 
-import com.devryan.course.dto.ProductDTO;
-import com.devryan.course.entities.Order;
 import com.devryan.course.entities.Product;
-import com.devryan.course.entities.User;
-import com.devryan.course.repositories.OrderRepository;
 import com.devryan.course.repositories.ProductRepository;
 import com.devryan.course.services.exceptions.DatabaseException;
 import com.devryan.course.services.exceptions.ResourceNotFoundException;
