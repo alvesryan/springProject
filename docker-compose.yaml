@@ -3,18 +3,18 @@ services:
     image: postgres:latest
     container_name: postgres_db
     environment:
-      POSTGRES_DB: course_project
-      POSTGRES_USER: devryan
-      POSTGRES_PASSWORD: devryan
+      POSTGRES_DB: ${KEY_POSTGRES_DB}
+      POSTGRES_USER: ${KEY_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${KEY_POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "${KEY_POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - course-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U devryan -d course_project"]
+      test: ["CMD-SHELL", "pg_isready -U ${KEY_POSTGRES_USER} -d ${KEY_POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
