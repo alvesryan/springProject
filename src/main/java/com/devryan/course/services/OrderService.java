@@ -1,11 +1,14 @@
 package com.devryan.course.services;
 
+import com.devryan.course.dto.OrderDTO;
 import com.devryan.course.entities.Order;
 import com.devryan.course.repositories.OrderRepository;
 import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +20,9 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public List<Order> findAll(){
-        return orderRepository.findAll();
+    public Page<OrderDTO> findAll(Pageable pageable){
+        Page<Order> page = orderRepository.findAll(pageable);
+        return page.map(OrderDTO::new);
     }
 
     public Order findById(Long id){

@@ -5,6 +5,10 @@ import com.devryan.course.entities.Product;
 import com.devryan.course.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,11 +24,9 @@ public class ProductResources {
     private ProductService productService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<ProductDTO>> findAll(){
-        List<Product> products = productService.findAll();
-
-        List<ProductDTO> productDTOS = products.stream().map(ProductDTO::new).toList();
-        return ResponseEntity.ok().body(productDTOS);
+    public ResponseEntity<Page<ProductDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<ProductDTO> page = productService.findAll(pageable);
+        return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")

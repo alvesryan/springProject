@@ -1,10 +1,15 @@
 package com.devryan.course.resources;
 
 import com.devryan.course.dto.CategoryDTO;
+import com.devryan.course.dto.CategoryDetailsDTO;
 import com.devryan.course.entities.Category;
 import com.devryan.course.services.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,18 +25,16 @@ public class CategoryResources {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDTO>> findAll(){
-        List<Category> list = categoryService.findAll();
-
-        List<CategoryDTO> dtoList = list.stream().map(CategoryDTO::new).toList();
-        return ResponseEntity.ok().body(dtoList);
+    public ResponseEntity<Page<CategoryDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<CategoryDTO> page = categoryService.findAll(pageable);
+        return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id){
+    public ResponseEntity<CategoryDetailsDTO> findById(@PathVariable Long id){
         Category category = categoryService.findById(id);
 
-        CategoryDTO categoryDTO = new CategoryDTO(category);
+        CategoryDetailsDTO categoryDTO = new CategoryDetailsDTO(category);
         return ResponseEntity.ok().body(categoryDTO);
     }
 

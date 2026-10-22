@@ -1,5 +1,6 @@
 package com.devryan.course.services;
 
+import com.devryan.course.dto.UserDTO;
 import com.devryan.course.entities.User;
 import com.devryan.course.repositories.UserRepository;
 import com.devryan.course.services.exceptions.DatabaseException;
@@ -7,9 +8,11 @@ import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+
 import java.util.Optional;
 
 @Service // diz ao spring, essa classe contém regras de negócio e deve ser registrada no seu container para poder ser injetada em outros lugares
@@ -18,8 +21,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> findAll(){
-        return userRepository.findAll();
+    public Page<UserDTO> findAll(Pageable pageable){ //Recebe um objeto ditando as regras da paginação (Qual página trazer, quantos itens trazer e em qual ordem)
+        Page<User> page = userRepository.findAll(pageable); //faz a consulta no banco de dados com base nas informações do objeto pageable
+        return page.map(UserDTO::new);
     }
 
     public User findById(Long id){

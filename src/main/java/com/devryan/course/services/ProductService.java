@@ -1,5 +1,6 @@
 package com.devryan.course.services;
 
+import com.devryan.course.dto.ProductDTO;
 import com.devryan.course.entities.Product;
 import com.devryan.course.repositories.ProductRepository;
 import com.devryan.course.services.exceptions.DatabaseException;
@@ -7,6 +8,8 @@ import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +21,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public List<Product> findAll(){
-        return productRepository.findAll();
+    public Page<ProductDTO> findAll(Pageable pageable){
+        Page<Product> page = productRepository.findAll(pageable);
+        return page.map(ProductDTO::new);
     }
 
     public Product findById(Long id){

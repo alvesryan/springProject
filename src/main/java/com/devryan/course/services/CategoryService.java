@@ -1,11 +1,14 @@
 package com.devryan.course.services;
 
+import com.devryan.course.dto.CategoryDTO;
 import com.devryan.course.entities.Category;
 import com.devryan.course.repositories.CategoryRepository;
 import com.devryan.course.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +20,9 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<Category> findAll(){
-        return categoryRepository.findAll();
+    public Page<CategoryDTO> findAll(Pageable pageable){
+        Page<Category> page = categoryRepository.findAll(pageable);
+        return page.map(CategoryDTO::new);
     }
 
     public Category findById(Long id){

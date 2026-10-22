@@ -5,12 +5,15 @@ import com.devryan.course.entities.Order;
 import com.devryan.course.services.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/orders")
@@ -20,11 +23,9 @@ public class OrderResources {
     private OrderService orderService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<OrderDTO>> findAll(){
-        List<Order> list = orderService.findAll();
-
-        List<OrderDTO> dtoList = list.stream().map(OrderDTO::new).toList();
-        return ResponseEntity.ok().body(dtoList);
+    public ResponseEntity<Page<OrderDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "moment", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<OrderDTO> page = orderService.findAll(pageable);
+        return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")

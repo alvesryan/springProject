@@ -5,6 +5,10 @@ import com.devryan.course.entities.User;
 import com.devryan.course.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,12 +24,9 @@ public class UserResources {
     private UserService userService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<List<UserDTO>> findAll(){
-        List<User> list = userService.findAll();
-        // Convertemos a lista de Entidades (User) para uma lista de DTOs (UserDTO)
-        // O .stream().map() aplica o construtor do DTO em cada elemento da lista original
-        List<UserDTO> listDto = list.stream().map(UserDTO::new).toList();
-        return ResponseEntity.ok().body(listDto);
+    public ResponseEntity<Page<UserDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<UserDTO> page = userService.findAll(pageable);
+        return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")

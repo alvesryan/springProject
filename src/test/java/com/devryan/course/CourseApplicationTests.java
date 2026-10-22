@@ -82,8 +82,7 @@ class CourseApplicationTests {
 
 	@Test
 	void categoryDTOValidation_ShouldFailWhenNameIsBlank() {
-		CategoryDTO dto = new CategoryDTO();
-		dto.setName("");
+		CategoryDTO dto = new CategoryDTO(null, "");
 
 		Set<ConstraintViolation<CategoryDTO>> violations = validator.validate(dto);
 		assertFalse(violations.isEmpty(), "Violations should not be empty for blank category name");
@@ -92,8 +91,7 @@ class CourseApplicationTests {
 
 	@Test
 	void categoryDTOValidation_ShouldPassWhenNameIsValid() {
-		CategoryDTO dto = new CategoryDTO();
-		dto.setName("Electronics");
+		CategoryDTO dto = new CategoryDTO(null, "Electronics");
 
 		Set<ConstraintViolation<CategoryDTO>> violations = validator.validate(dto);
 		assertTrue(violations.isEmpty(), "Violations should be empty for valid CategoryDTO");
