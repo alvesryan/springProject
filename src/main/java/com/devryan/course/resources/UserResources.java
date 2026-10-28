@@ -1,6 +1,8 @@
 package com.devryan.course.resources;
 
 import com.devryan.course.dto.UserDTO;
+import com.devryan.course.dto.UserRequest;
+import com.devryan.course.dto.UserResponse;
 import com.devryan.course.entities.User;
 import com.devryan.course.services.UserService;
 import jakarta.validation.Valid;
@@ -24,24 +26,24 @@ public class UserResources {
     private UserService userService;
 
     @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<Page<UserDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<UserDTO> page = userService.findAll(pageable);
-        return ResponseEntity.ok().body(page);
+    public ResponseEntity<Page<UserResponse>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<UserResponse> page = userService.findAll(pageable);
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Long id){
+    public ResponseEntity<UserResponse> findById(@PathVariable Long id){
         User user = userService.findById(id);
-        UserDTO dto = new UserDTO(user);
-        return ResponseEntity.ok().body(dto);
+        UserResponse response = new UserResponse(user);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> insert(@RequestBody @Valid UserDTO userDTO){
-        User user = userDTO.toEntity();
+    public ResponseEntity<UserResponse> insert(@RequestBody @Valid UserRequest request){
+        User user = request.toEntity();
         user = userService.insert(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
-        return ResponseEntity.created(uri).body(new UserDTO(user));
+        return ResponseEntity.created(uri).body(new UserResponse(user));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -51,9 +53,9 @@ public class UserResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody @Valid UserDTO userDTO){
-        User user = userDTO.toEntity();
+    public ResponseEntity<UserResponse> update(@PathVariable Long id, @RequestBody @Valid UserRequest request){
+        User user = request.toEntity();
         user = userService.update(id, user);
-        return ResponseEntity.ok().body(new UserDTO(user));
+        return ResponseEntity.ok().body(new UserResponse(user));
     }
 }

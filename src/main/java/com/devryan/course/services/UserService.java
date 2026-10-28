@@ -1,6 +1,6 @@
 package com.devryan.course.services;
 
-import com.devryan.course.dto.UserDTO;
+import com.devryan.course.dto.UserResponse;
 import com.devryan.course.entities.User;
 import com.devryan.course.repositories.UserRepository;
 import com.devryan.course.services.exceptions.DatabaseException;
@@ -21,9 +21,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Page<UserDTO> findAll(Pageable pageable){ //Recebe um objeto ditando as regras da paginação (Qual página trazer, quantos itens trazer e em qual ordem)
+    public Page<UserResponse> findAll(Pageable pageable){ //Recebe um objeto ditando as regras da paginação (Qual página trazer, quantos itens trazer e em qual ordem)
         Page<User> page = userRepository.findAll(pageable); //faz a consulta no banco de dados com base nas informações do objeto pageable
-        return page.map(UserDTO::new);
+        return page.map(UserResponse::new); //retorna um userResponse
     }
 
     public User findById(Long id){
