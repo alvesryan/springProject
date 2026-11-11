@@ -8,13 +8,16 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Instant;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class CourseApplicationTests {
 
 	private static Validator validator;
@@ -30,15 +33,11 @@ class CourseApplicationTests {
 	}
 
 	@Test
-	void userDTOValidation_ShouldFailWhenFieldsAreBlankOrInvalid() {
-		UserDTO dto = new UserDTO();
-		dto.setName("");
-		dto.setEmail("invalid-email");
-		dto.setPhone("");
-		dto.setPassword("123");
+	void userRequestValidation_ShouldFailWhenFieldsAreBlankOrInvalid() {
+		UserRequest request = new UserRequest("", "invalid-email", "", "123");
 
-		Set<ConstraintViolation<UserDTO>> violations = validator.validate(dto);
-		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid UserDTO");
+		Set<ConstraintViolation<UserRequest>> violations = validator.validate(request);
+		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid UserRequest");
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("email")));
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("phone")));
@@ -46,38 +45,29 @@ class CourseApplicationTests {
 	}
 
 	@Test
-	void userDTOValidation_ShouldPassWhenFieldsAreValid() {
-		UserDTO dto = new UserDTO();
-		dto.setName("John Doe");
-		dto.setEmail("john@example.com");
-		dto.setPhone("999999999");
-		dto.setPassword("123456");
+	void userRequestValidation_ShouldPassWhenFieldsAreValid() {
+		UserRequest request = new UserRequest("John Doe", "john@example.com", "999999999", "123456");
 
-		Set<ConstraintViolation<UserDTO>> violations = validator.validate(dto);
-		assertTrue(violations.isEmpty(), "Violations should be empty for valid UserDTO");
+		Set<ConstraintViolation<UserRequest>> violations = validator.validate(request);
+		assertTrue(violations.isEmpty(), "Violations should be empty for valid UserRequest");
 	}
 
 	@Test
-	void productDTOValidation_ShouldFailWhenNameIsBlankOrPriceInvalid() {
-		ProductDTO dto = new ProductDTO();
-		dto.setName("");
-		dto.setPrice(-5.0);
+	void productRequestValidation_ShouldFailWhenNameIsBlankOrPriceInvalid() {
+		ProductRequest request = new ProductRequest("", "Description", -5.0, "img.jpg");
 
-		Set<ConstraintViolation<ProductDTO>> violations = validator.validate(dto);
-		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid ProductDTO");
+		Set<ConstraintViolation<ProductRequest>> violations = validator.validate(request);
+		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid ProductRequest");
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("price")));
 	}
 
 	@Test
-	void productDTOValidation_ShouldPassWhenFieldsAreValid() {
-		ProductDTO dto = new ProductDTO();
-		dto.setName("Notebook");
-		dto.setDescription("High performance");
-		dto.setPrice(3500.0);
+	void productRequestValidation_ShouldPassWhenFieldsAreValid() {
+		ProductRequest request = new ProductRequest("Notebook", "High performance", 3500.0, "img.jpg");
 
-		Set<ConstraintViolation<ProductDTO>> violations = validator.validate(dto);
-		assertTrue(violations.isEmpty(), "Violations should be empty for valid ProductDTO");
+		Set<ConstraintViolation<ProductRequest>> violations = validator.validate(request);
+		assertTrue(violations.isEmpty(), "Violations should be empty for valid ProductRequest");
 	}
 
 	@Test
@@ -98,26 +88,40 @@ class CourseApplicationTests {
 	}
 
 	@Test
-	void orderDTOValidation_ShouldFailWhenOrderStatusIsNull() {
-		OrderDTO dto = new OrderDTO();
-		dto.setOrderStatus(null);
+	void orderRequestValidation_ShouldFailWhenStatusOrClientIsNull() {
+		OrderRequest request = new OrderRequest(Instant.now(), null, null);
 
-		Set<ConstraintViolation<OrderDTO>> violations = validator.validate(dto);
-		assertFalse(violations.isEmpty(), "Violations should not be empty for null orderStatus");
+		Set<ConstraintViolation<OrderRequest>> violations = validator.validate(request);
+		assertFalse(violations.isEmpty(), "Violations should not be empty for null orderStatus and client");
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("orderStatus")));
+		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("client")));
 	}
 
 	@Test
-	void orderItemDTOValidation_ShouldFailWhenQuantityOrPriceInvalid() {
-		OrderItemDTO dto = new OrderItemDTO();
-		dto.setName("");
-		dto.setQuantity(-1);
-		dto.setPrice(0.0);
+	void orderRequestValidation_ShouldPassWhenFieldsAreValid() {
+		UserResponse client = new UserResponse(1L, "Maria Brown", "maria@gmail.com", "988888888");
+		OrderRequest request = new OrderRequest(Instant.now(), 1, client);
 
-		Set<ConstraintViolation<OrderItemDTO>> violations = validator.validate(dto);
-		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid OrderItemDTO");
+		Set<ConstraintViolation<OrderRequest>> violations = validator.validate(request);
+		assertTrue(violations.isEmpty(), "Violations should be empty for valid OrderRequest");
+	}
+
+	@Test
+	void orderItemRequestValidation_ShouldFailWhenQuantityOrPriceInvalid() {
+		OrderItemRequest request = new OrderItemRequest("", -1, 0.0);
+
+		Set<ConstraintViolation<OrderItemRequest>> violations = validator.validate(request);
+		assertFalse(violations.isEmpty(), "Violations should not be empty for invalid OrderItemRequest");
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("quantity")));
 		assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("price")));
+	}
+
+	@Test
+	void orderItemRequestValidation_ShouldPassWhenFieldsAreValid() {
+		OrderItemRequest request = new OrderItemRequest("Teclado Mecânico", 2, 250.0);
+
+		Set<ConstraintViolation<OrderItemRequest>> violations = validator.validate(request);
+		assertTrue(violations.isEmpty(), "Violations should be empty for valid OrderItemRequest");
 	}
 }

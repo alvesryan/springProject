@@ -2,39 +2,45 @@ package com.devryan.course.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_product")
 public class Product implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     private String name;
     private String description;
     private Double price;
     private String imgUrl;
 
-    @ManyToMany // Cria relação muitos pra muitos na class Category
-    @JoinTable(name = "tb_product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
-    //une as colunas id para formar uma tabela de associação
+    @ManyToMany
+    @JoinTable(
+            name = "tb_product_category",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Setter(AccessLevel.NONE)
     private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "id.product")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Set<OrderItem> itens = new HashSet<>();
 
-    public Product() {
-    }
-
     public Product(Long id, String name, String description, Double price) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
+        this(id, name, description, price, null);
     }
 
     public Product(Long id, String name, String description, Double price, String imgUrl) {
@@ -45,69 +51,12 @@ public class Product implements Serializable {
         this.imgUrl = imgUrl;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public String getImgUrl() {
-        return imgUrl;
-    }
-
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
-    }
-
-    public Set<Category> getCategories() {
-        return categories;
-    }
-
-    //método feito para adicionar os itens de pedido a uma coleção de pedidos, retorna os pedidos em que esse item foi colocado.
     @JsonIgnore
-    public Set<Order> getOrders(){
-        Set <Order> set = new HashSet<>();
-        for(OrderItem x : itens){
+    public Set<Order> getOrders() {
+        Set<Order> set = new HashSet<>();
+        for (OrderItem x : itens) {
             set.add(x.getOrder());
         }
         return set;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
-        return Objects.equals(id, product.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

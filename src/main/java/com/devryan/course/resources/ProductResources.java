@@ -1,6 +1,7 @@
 package com.devryan.course.resources;
 
-import com.devryan.course.dto.ProductDTO;
+import com.devryan.course.dto.ProductRequest;
+import com.devryan.course.dto.ProductResponse;
 import com.devryan.course.entities.Product;
 import com.devryan.course.services.ProductService;
 import jakarta.validation.Valid;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/products")
@@ -23,26 +23,25 @@ public class ProductResources {
     @Autowired
     private ProductService productService;
 
-    @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<Page<ProductDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<ProductDTO> page = productService.findAll(pageable);
+    @GetMapping
+    public ResponseEntity<Page<ProductResponse>> findAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<ProductResponse> page = productService.findAll(pageable);
         return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable Long id){
+    public ResponseEntity<ProductResponse> findById(@PathVariable Long id){
         Product product = productService.findById(id);
-
-        ProductDTO productDTO = new ProductDTO(product);
-        return ResponseEntity.ok().body(productDTO);
+        ProductResponse response = new ProductResponse(product);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping
-    public ResponseEntity<ProductDTO> insert(@RequestBody @Valid ProductDTO dto){
-        Product product = dto.toProduct();
+    public ResponseEntity<ProductResponse> insert(@RequestBody @Valid ProductRequest request){
+        Product product = request.toEntity();
         product = productService.insert(product);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(product.getId()).toUri();
-        return ResponseEntity.created(uri).body(new ProductDTO(product));
+        return ResponseEntity.created(uri).body(new ProductResponse(product));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -52,9 +51,9 @@ public class ProductResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody @Valid ProductDTO dto){
-        Product product = dto.toProduct();
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @RequestBody @Valid ProductRequest request){
+        Product product = request.toEntity();
         product = productService.update(id, product);
-        return ResponseEntity.ok().body(new ProductDTO(product));
+        return ResponseEntity.ok().body(new ProductResponse(product));
     }
 }

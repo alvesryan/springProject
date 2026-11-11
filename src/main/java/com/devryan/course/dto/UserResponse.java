@@ -8,8 +8,12 @@ public record UserResponse(
         String email,
         String phone) {
 
-    //construtor para ler a entidade do banco
+    // Construtor para ler a entidade do banco
     public UserResponse(User entity){
         this(entity.getId(), entity.getName(), entity.getEmail(), entity.getPhone());
+    }
+
+    public User toEntity() {
+        return new User(id, name, email, phone, null);
     }
 }

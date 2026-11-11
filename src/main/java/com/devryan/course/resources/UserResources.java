@@ -1,6 +1,5 @@
 package com.devryan.course.resources;
 
-import com.devryan.course.dto.UserDTO;
 import com.devryan.course.dto.UserRequest;
 import com.devryan.course.dto.UserResponse;
 import com.devryan.course.entities.User;

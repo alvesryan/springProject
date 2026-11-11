@@ -12,7 +12,7 @@ API RESTful desenvolvida com **Java 21** e **Spring Boot**, focada nas boas prá
 
 > [!IMPORTANT]
 > **Status do Projeto: Em Desenvolvimento Ativo 🚧**
-> O projeto já conta com o modelo de domínio completo, DTOs com validações, tratamento robusto de erros, suporte a múltiplos ambientes (`dev` com PostgreSQL em Docker e `test` com H2 em memória), variáveis de ambiente desacopladas via arquivo `.env`, carga automática de dados de teste (50+ registros realistas), **paginação e ordenação dinâmica com `Pageable`** em todos os endpoints de listagem e início da adoção de **Java Records**.
+> O projeto conta com o modelo de domínio completo, arquitetura 100% modernizada com **Java Records** no padrão **Request / Response**, validações declarativas com Jakarta Bean Validation, tratamento robusto de erros, suporte a múltiplos ambientes (`dev` com PostgreSQL em Docker e `test` com H2 em memória), variáveis de ambiente desacopladas via arquivo `.env`, carga automática de dados de teste (50+ registros realistas) e **paginação e ordenação dinâmica com `Pageable`** em todos os endpoints de listagem.
 >
 > Veja a seção [Roadmap e Próximos Passos](#-roadmap-e-próximos-passos) para consultar as etapas concluídas e futuras.
 
@@ -57,8 +57,8 @@ API RESTful desenvolvida com **Java 21** e **Spring Boot**, focada nas boas prá
 O **Course API** é um serviço web para gerenciamento de um ecossistema de e-commerce e pedidos, contemplando o ciclo completo entre **Usuários (Clientes)**, **Pedidos**, **Itens de Pedido**, **Produtos**, **Categorias** e **Pagamentos**.
 
 O projeto foi construído seguindo os padrões e convenções modernas da indústria:
-- **Padrão DTO (Data Transfer Objects):** Desacopla a camada de persistência da camada de apresentação HTTP, ocultando campos sensíveis (como a senha em `UserDTO` via `WRITE_ONLY`) e prevenindo serializações cíclicas infinitas no Jackson.
-- **Java Records & DTOs Especializados:** Modernização com `record` para classes imutáveis e concisas (ex: `CategoryDTO`) e separação de responsabilidades com DTO de detalhes (`CategoryDetailsDTO`), otimizando as consultas ao retornar associações de produtos apenas quando um item específico for consultado.
+- **Padrão DTO e Arquitetura com Java Records (Request / Response):** Desacopla a camada de persistência da camada de apresentação HTTP através de Records imutáveis nativos do Java 21. Separa contratos de entrada (`Request`) e saída (`Response`), garantindo que atributos sensíveis (como senha de usuário) jamais sejam expostos e eliminando loops cíclicos de serialização JSON.
+- **DTOs Especializados (Resumo vs. Detalhes):** Segregação inteligente de granularidade com Records leves para listagens paginadas (ex: `CategoryDTO`) e detalhados para consultas pontuais por identificador (`CategoryDetailsDTO`), otimizando o tráfego de rede e performance.
 - **Paginação e Ordenação Dinâmica (Spring Data Pageable):** Todas as operações de listagem (`findAll`) utilizam paginação via banco de dados (`Pageable`, `Page<T>`, `@PageableDefault`), evitando sobrecarga de tráfego de rede e consumo excessivo de memória.
 - **Validação Declarativa de Dados:** Anotações Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@Positive`, `@Email`, `@Size`, `@NotNull`) nos DTOs, validando a integridade das requisições antes de qualquer operação de persistência.
 - **Tratamento Global de Exceções:** `@ControllerAdvice` padronizando respostas de erro com timestamp, status HTTP, mensagem descritiva e URI solicitada.
@@ -134,6 +134,7 @@ O projeto foi construído seguindo os padrões e convenções modernas da indús
 - **Containerização:** Docker & Docker Compose
 - **Configuração de Ambiente:** Dotenv (`.env` lido pelo Docker e Spring Boot)
 - **Gerenciador de Dependências:** Apache Maven 3.9+ (com Maven Wrapper `./mvnw` embutido)
+- **Produtividade & Boilerplate:** Project Lombok (eliminação de boilerplate com `@Getter`, `@Setter`, `@EqualsAndHashCode`, `@NoArgsConstructor`, `@AllArgsConstructor`)
 - **Testes Automatizados:** JUnit 5, Mockito e Jakarta Bean Validation
 
 ---
@@ -366,7 +367,7 @@ Parâmetros de paginação e ordenação aceitos na URL:
 }
 ```
 
-> **Segurança:** O atributo `password` possui anotação `@JsonProperty(access = Access.WRITE_ONLY)`, nunca sendo exposto nas respostas das requisições `GET`, `POST` ou `PUT`.
+> **Segurança por Contrato:** O atributo sensível `password` existe exclusivamente no Record de entrada (`UserRequest`). As respostas da API retornam estritamente o Record `UserResponse` (`id`, `name`, `email`, `phone`), garantindo segurança estrutural por design.
 
 ---
 
@@ -374,18 +375,29 @@ Parâmetros de paginação e ordenação aceitos na URL:
 
 | Método | Endpoint | Parâmetros / Padrão | Descrição | Status Sucesso |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/products` | `page=0, size=10, sort=name,asc` | Lista produtos paginados e ordenados por nome | `200 OK` |
-| `GET` | `/products/{id}` | - | Busca um produto detalhado por ID | `200 OK` |
-| `POST` | `/products` | Body JSON | Cadastra um novo produto | `201 Created` |
-| `PUT` | `/products/{id}` | Body JSON | Atualiza os dados de um produto | `200 OK` |
+| `GET` | `/products` | `page=0, size=10, sort=name,asc` | Lista produtos paginados em formato `ProductResponse` | `200 OK` |
+| `GET` | `/products/{id}` | - | Busca detalhes de um produto por ID (`ProductResponse`) | `200 OK` |
+| `POST` | `/products` | Body JSON (`ProductRequest`) | Cadastra um novo produto | `201 Created` |
+| `PUT` | `/products/{id}` | Body JSON (`ProductRequest`) | Atualiza os dados de um produto | `200 OK` |
 | `DELETE` | `/products/{id}` | - | Remove um produto por ID | `204 No Content` |
 
-**Exemplo de Payload (POST / PUT `/products`):**
+**Exemplo de Payload (POST / PUT `/products` - `ProductRequest`):**
 ```json
 {
   "name": "Monitor UltraWide 29\"",
   "description": "Monitor IPS 75Hz Full HD",
   "price": 1250.00,
+  "imgUrl": "https://example.com/monitor.jpg"
+}
+```
+
+**Exemplo de Resposta (GET / POST / PUT `/products` - `ProductResponse`):**
+```json
+{
+  "id": 1,
+  "name": "Monitor UltraWide 29\"",
+  "description": "Monitor IPS 75Hz Full HD",
+  "price": 1250.0,
   "imgUrl": "https://example.com/monitor.jpg"
 }
 ```
@@ -432,10 +444,10 @@ Parâmetros de paginação e ordenação aceitos na URL:
 
 | Método | Endpoint | Parâmetros / Padrão | Descrição | Status Sucesso |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/orders` | `page=0, size=10, sort=moment,asc` | Lista pedidos paginados e ordenados por data | `200 OK` |
-| `GET` | `/orders/{id}` | - | Busca detalhes de um pedido por ID com itens e total | `200 OK` |
-| `POST` | `/orders` | Body JSON | Cria um novo pedido | `201 Created` |
-| `PUT` | `/orders/{id}` | Body JSON | Atualiza um pedido | `200 OK` |
+| `GET` | `/orders` | `page=0, size=10, sort=moment,asc` | Lista pedidos paginados e ordenados por data (`OrderResponse`) | `200 OK` |
+| `GET` | `/orders/{id}` | - | Busca detalhes de um pedido por ID com cliente, itens e total (`OrderResponse`) | `200 OK` |
+| `POST` | `/orders` | Body JSON (`OrderRequest`) | Cria um novo pedido | `201 Created` |
+| `PUT` | `/orders/{id}` | Body JSON (`OrderRequest`) | Atualiza status e dados de um pedido | `200 OK` |
 | `DELETE` | `/orders/{id}` | - | Remove um pedido por ID | `204 No Content` |
 
 > **Valores do Status do Pedido (`orderStatus`):**
@@ -444,6 +456,41 @@ Parâmetros de paginação e ordenação aceitos na URL:
 > - `3`: `Shipped` (Enviado)
 > - `4`: `Delivered` (Entregue)
 > - `5`: `Canceled` (Cancelado)
+
+**Exemplo de Payload (POST / PUT `/orders` - `OrderRequest`):**
+```json
+{
+  "moment": "2026-11-11T13:30:00Z",
+  "orderStatus": 1,
+  "client": {
+    "id": 1
+  }
+}
+```
+
+**Exemplo de Resposta (GET / POST / PUT `/orders` - `OrderResponse`):**
+```json
+{
+  "id": 1,
+  "moment": "2026-01-10T10:00:00Z",
+  "orderStatus": "Paid",
+  "client": {
+    "id": 1,
+    "name": "Maria Brown",
+    "email": "maria.brown@gmail.com",
+    "phone": "988888801"
+  },
+  "items": [
+    {
+      "name": "MacBook Pro 16 M3 Max",
+      "quantity": 1,
+      "price": 24999.0,
+      "subTotal": 24999.0
+    }
+  ],
+  "total": 24999.0
+}
+```
 
 ---
 
@@ -454,13 +501,17 @@ O projeto segue a arquitetura multicamadas padrão do ecossistema Spring Boot:
 ```text
 src/main/java/com/devryan/course/
 ├── config/              # Configurações de perfis e seed de banco (TestConfig)
-├── dto/                 # DTOs, Java Records e regras de validação Bean Validation
-│   ├── CategoryDTO.java          # Java Record com validação
-│   ├── CategoryDetailsDTO.java   # DTO com coleção de produtos associados
-│   ├── OrderDTO.java             # DTO de pedido com itens e total
-│   ├── OrderItemDTO.java         # DTO de item de pedido e subtotal
-│   ├── ProductDTO.java           # DTO de produto
-│   └── UserDTO.java              # DTO de usuário com proteção WRITE_ONLY de senha
+├── dto/                 # Contratos 100% Java Records (Padrão Request / Response)
+│   ├── CategoryDTO.java          # Record para listagens leves de categorias
+│   ├── CategoryDetailsDTO.java   # Record com coleção de produtos associados
+│   ├── OrderItemRequest.java     # Record para validação de item de pedido
+│   ├── OrderItemResponse.java    # Record de retorno de item de pedido com subtotal
+│   ├── OrderRequest.java         # Record para inserção e atualização de pedidos
+│   ├── OrderResponse.java        # Record de retorno de pedido com itens, cliente e total
+│   ├── ProductRequest.java       # Record para cadastro e atualização de produtos
+│   ├── ProductResponse.java      # Record de retorno de produto
+│   ├── UserRequest.java          # Record com validações de entrada e senha
+│   └── UserResponse.java         # Record de retorno seguro sem exposição de senha
 ├── entities/            # Entidades JPA mapeadas para tabelas relacionais
 │   ├── enums/           # Enumerados de domínio (ex: OrderStatus)
 │   └── pk/              # Chaves primárias compostas (OrderItemPk)
@@ -540,9 +591,11 @@ O desenvolvimento do projeto segue um roteiro técnico planejado e incremental:
   - Implementação de `Pageable` e `Page<T>` em todos os métodos `findAll()` da camada de serviços e controladores REST.
   - Configuração de valores padrão com `@PageableDefault` (páginas de 10 itens com ordenação definida por recurso).
   - Suporte completo a parâmetros na URL (`?page=0&size=10&sort=campo,asc|desc`).
-- [x] **8. Modernização com Java Records & DTOs Especializados:**
-  - Refatoração de `CategoryDTO` utilizando Java Record para maior imutabilidade e concisão.
-  - Criação de `CategoryDetailsDTO` para evitar tráfego de dados desnecessário em listagens paginadas e carregar itens apenas na consulta por ID.
+- [x] **8. Modernização Completa com Java Records & Padrão Request / Response:**
+  - Migração de 100% dos DTOs legados para **Java Records** imutáveis (`CategoryDTO`, `CategoryDetailsDTO`, `UserRequest`, `UserResponse`, `ProductRequest`, `ProductResponse`, `OrderRequest`, `OrderResponse`, `OrderItemRequest`, `OrderItemResponse`).
+  - Segregação arquitetural estrita entre contratos de entrada (`Request`) com Bean Validation e saída (`Response`) com proteção estrutural de dados sensíveis.
+  - Criação de DTOs especializados para categorias (`CategoryDTO` leve para listagens e `CategoryDetailsDTO` para consultas detalhadas com produtos).
+  - Remoção definitiva de todas as classes DTO mutáveis legadas.
 - [x] **9. Dataset de Teste e Homologação Robusto:**
   - Seed ampliado em `TestConfig` com 50+ registros realistas (categorias, produtos variados, usuários e pedidos com pagamentos) para validação prática de paginação.
 
@@ -559,13 +612,11 @@ O desenvolvimento do projeto segue um roteiro técnico planejado e incremental:
 - [ ] **3. Expansão da Cobertura de Testes Automatizados:**
   - Testes unitários com **Mockito** e **JUnit 5** cobrindo cenários de sucesso e exceções na camada de serviços (`UserService`, `ProductService`, etc.).
   - Testes de integração de controladores com **MockMvc** (`@WebMvcTest` e `@SpringBootTest`).
-- [ ] **4. Migração Gradual dos demais DTOs para Java Records:**
-  - Avaliar e migrar `ProductDTO`, `OrderItemDTO`, etc. para Java Records onde a imutabilidade for desejada.
-- [ ] **5. Segurança e Autenticação com Spring Security e JWT:**
+- [ ] **4. Segurança e Autenticação com Spring Security e JWT:**
   - Implementar autenticação stateless com tokens JWT (JSON Web Tokens).
   - Criptografia de senhas com `BCryptPasswordEncoder`.
   - Controle de autorização baseado em perfis (ex: `ROLE_ADMIN` e `ROLE_CLIENT`).
-- [ ] **6. Containerização Completa da Aplicação:**
+- [ ] **5. Containerização Completa da Aplicação:**
   - Criação de `Dockerfile` multi-stage otimizado para o executável Spring Boot.
   - Orquestração única no `docker-compose.yaml` subindo tanto a API quanto o PostgreSQL juntos.
 

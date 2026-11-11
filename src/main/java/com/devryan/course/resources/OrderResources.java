@@ -1,6 +1,7 @@
 package com.devryan.course.resources;
 
-import com.devryan.course.dto.OrderDTO;
+import com.devryan.course.dto.OrderRequest;
+import com.devryan.course.dto.OrderResponse;
 import com.devryan.course.entities.Order;
 import com.devryan.course.services.OrderService;
 import jakarta.validation.Valid;
@@ -22,26 +23,25 @@ public class OrderResources {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping// Mapeia requisições http do tipo GET
-    public ResponseEntity<Page<OrderDTO>> findAll(@PageableDefault(page = 0, size = 10, sort = "moment", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<OrderDTO> page = orderService.findAll(pageable);
+    @GetMapping
+    public ResponseEntity<Page<OrderResponse>> findAll(@PageableDefault(page = 0, size = 10, sort = "moment", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<OrderResponse> page = orderService.findAll(pageable);
         return ResponseEntity.ok().body(page);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<OrderDTO> findById(@PathVariable Long id){
+    public ResponseEntity<OrderResponse> findById(@PathVariable Long id){
         Order order = orderService.findById(id);
-
-        OrderDTO orderDTO = new OrderDTO(order);
-        return ResponseEntity.ok().body(orderDTO);
+        OrderResponse response = new OrderResponse(order);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping
-    public ResponseEntity<OrderDTO> insert(@RequestBody @Valid OrderDTO dto){
-        Order order = dto.toEntity();
+    public ResponseEntity<OrderResponse> insert(@RequestBody @Valid OrderRequest request){
+        Order order = request.toEntity();
         order = orderService.insert(order);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri();
-        return ResponseEntity.created(uri).body(new OrderDTO(order));
+        return ResponseEntity.created(uri).body(new OrderResponse(order));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -51,9 +51,9 @@ public class OrderResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<OrderDTO> update(@PathVariable Long id, @RequestBody @Valid OrderDTO dto){
-        Order order = dto.toEntity();
+    public ResponseEntity<OrderResponse> update(@PathVariable Long id, @RequestBody @Valid OrderRequest request){
+        Order order = request.toEntity();
         order = orderService.update(id, order);
-        return ResponseEntity.ok().body(new OrderDTO(order));
+        return ResponseEntity.ok().body(new OrderResponse(order));
     }
 }

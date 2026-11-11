@@ -1,6 +1,6 @@
 package com.devryan.course.services;
 
-import com.devryan.course.dto.ProductDTO;
+import com.devryan.course.dto.ProductResponse;
 import com.devryan.course.entities.Product;
 import com.devryan.course.repositories.ProductRepository;
 import com.devryan.course.services.exceptions.DatabaseException;
@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,13 +20,12 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Page<ProductDTO> findAll(Pageable pageable){
+    public Page<ProductResponse> findAll(Pageable pageable){
         Page<Product> page = productRepository.findAll(pageable);
-        return page.map(ProductDTO::new);
+        return page.map(ProductResponse::new);
     }
 
     public Product findById(Long id){
-        productRepository.findById(id);
         Optional<Product> product = productRepository.findById(id);
         return product.orElseThrow(() -> new ResourceNotFoundException(id));
     }

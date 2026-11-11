@@ -1,6 +1,6 @@
 package com.devryan.course.services;
 
-import com.devryan.course.dto.OrderDTO;
+import com.devryan.course.dto.OrderResponse;
 import com.devryan.course.entities.Order;
 import com.devryan.course.repositories.OrderRepository;
 import com.devryan.course.services.exceptions.ResourceNotFoundException;
@@ -20,9 +20,9 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public Page<OrderDTO> findAll(Pageable pageable){
+    public Page<OrderResponse> findAll(Pageable pageable){
         Page<Order> page = orderRepository.findAll(pageable);
-        return page.map(OrderDTO::new);
+        return page.map(OrderResponse::new);
     }
 
     public Order findById(Long id){
